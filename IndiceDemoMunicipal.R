@@ -19,8 +19,12 @@ library(GGally) # Extension to 'ggplot2', CRAN v2.0.0
 library(ggcorrplot) # Visualization of a Correlation Matrix using 'ggplot2', CRAN v0.1.3
 library(haven) # Import and Export 'SPSS', 'Stata' and 'SAS' Files, CRAN v2.3.1
 library(tidyverse) # Easily Install and Load the 'Tidyverse' 
-
-
+library(here)
+library(glue)
+library(officer)
+library(rvg)
+library(viridis)
+library(readxl)
 # 1- LOAD DATA ####
 
 # 1-A Cargo base de datos
@@ -61,8 +65,9 @@ corr_escalado <- demo_escalado %>%
   cor(use = "pairwise") %>% 
   round(1)
 
+
 #Corrplot
-ggcorrplot(corr_escalado, type = "lower", lab = T, show.legend = F)
+ggcorrplot(corr_escalado, type = "lower", lab = T, show.legend = F) 
 
 ## Analisis de copmonentes principales
 pca_escalado <- princomp(demo_escalado)
@@ -155,10 +160,19 @@ comparacion %>%
   round(3)
 
 ## Correlaciones entre IDS y sus componentes (PCA)
-ids_escalado_pca %>%
-  select(comp_eje, comp_leg,control_cd, control_suc, pca_01) %>%
+corrplot_1 <- ids_escalado_pca %>%
+  mutate(Comp_Ejecutiva = comp_eje, Comp_Legis = comp_leg, Control_CD = control_cd,
+         Control_Sucesion = control_suc, IDS = pca_01) %>% 
+  select(Comp_Ejecutiva, Comp_Legis,Control_CD, Control_Sucesion, IDS) %>%
   cor(use = "pairwise") %>% 
   round(3)
+
+## CORRPLOT ENTRE IDS Y COMPONENTES
+ggcorrplot(corrplot_1, type = "lower", lab = T) +
+  theme_void() +
+  theme(axis.text.y=element_text(size=25),
+        axis.text.x = element_text(size=25)) 
+  
 
 # 5- Save Results ####
 ## Guardo resultados finales
@@ -189,7 +203,7 @@ ids_escalado_pca %>%
   select(ids, IDYEAR, MUNICIPIO) %>% view()
 
 # Boxplot de competencia ejecutiva (Grafico 1) ####
-ids_escalado_pca %>% 
+boxplot_grafico1 <- ids_escalado_pca %>% 
   select(comp_eje, IDYEAR) %>% 
   filter(IDYEAR != 2013) %>% 
   filter(IDYEAR != 2017) %>% 
@@ -201,6 +215,16 @@ ids_escalado_pca %>%
         axis.text.x = element_text(size=30),
         axis.title.y = element_text(size=25, angle = 90)) 
 
+#Ggplot a rvg
+p_dml <- rvg::dml(ggobj = boxplot_grafico1)
+
+officer::read_pptx() %>%
+  officer::add_slide() %>%
+  officer::ph_with(p_dml, ph_location()) %>%
+  base::print(
+  target = here::here("demo_two.pptx"
+  )
+)
 #Media de Control de sucesión ####
 mean(ids_escalado_pca$control_suc)
 #Media de Competencia Ejecutiva ####
@@ -210,7 +234,7 @@ mean(ids_escalado_pca$comp_eje)
 ## Grafico 2 ####
 seriesdetiempo <- read_excel("base_analisis_resultados.xlsx",sheet = "panel")
 
-seriesdetiempo %>% 
+boxplot_2 <- seriesdetiempo %>% 
   filter(MUNICIPIO != "TOLAR GRANDE") %>% 
   select(IDYEAR, TTPERCAP) %>% 
   filter(IDYEAR != 2013) %>% 
@@ -226,6 +250,16 @@ seriesdetiempo %>%
         axis.title.y = element_text(size=25, angle = 90)) 
 
 
+#Ggplot a rvg
+p_dml2 <- rvg::dml(ggobj = boxplot_2)
+
+officer::read_pptx() %>%
+  officer::add_slide() %>%
+  officer::ph_with(p_dml2, ph_location()) %>%
+  base::print(
+    target = here::here("demo_two.pptx"
+    )
+  )
 ## Estadisticas descriptivas VIs - VD - Tabla 5 ####
 
 seriesdetiempo %>% 
@@ -269,3 +303,18 @@ frecuencia <- demo_analisis %>% group_by(MUNICIPIO) %>% tally() %>% print()
 tabla_2 <- tabla %>% left_join(frecuencia) %>% arrange(ids_mean) %>% janitor::adorn_totals()
 
 tabla_2 %>% write_csv2("Tabla_IDSxMunicipio.csv")
+
+
+## IDS POR PERIODO ELECTORAL GRAFICO PPT ####
+
+ids_escalado_pca %>% 
+  select(ids, IDYEAR) %>% 
+  filter(IDYEAR != 2013) %>% 
+  filter(IDYEAR != 2017) %>% 
+  mutate( IDYEAR = as.character(IDYEAR)) %>% 
+  ggplot(aes(IDYEAR,  ids)) +
+  geom_boxplot() +
+  theme_void() +
+  theme(axis.text.y=element_text(size=25),
+        axis.text.x = element_text(size=30),
+        axis.title.y = element_text(size=25, angle = 90)) 

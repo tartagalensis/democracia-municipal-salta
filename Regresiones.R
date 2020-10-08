@@ -84,10 +84,10 @@ htmlreg( list(random_1, random_2, random_3, random_4, random_5),
 library(ggcorrplot)
 
 corr_selected <- panel %>% 
-  select(IDYEAR, ids, TTPERCAP,NBIPP,ANALFPP,CERCANIA) %>% 
+  select(ids, transferencias,NBIPP,CERCANIA) %>% 
   # calcular la matriz de correlación y redondear a un decimal
   cor(use = "pairwise") %>% 
-  round(1)
+  round(4)
 
 ggcorrplot(corr_selected, type = "lower", lab = T, show.legend = F)
 
