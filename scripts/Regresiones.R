@@ -5,10 +5,11 @@ library(texreg)
 library(zoo)
 
 
-panel <- read_excel("base_analisis_resultados.xlsx",sheet = "panel") %>% 
+panel <- read_excel("data/base_analisis_resultados.xlsx",sheet = "panel") %>% 
   mutate(transferencias = TTPERCAP/100, interaccion = (NBIPP * TTPERCAP/100)) %>% 
-  select(MUNICIPIO, IDYEAR, ids, transferencias, NBIPP, ANALFPP, CERCANIA, interaccion) %>% 
+  select(MUNICIPIO, IDMUNICIPIO, IDYEAR, ids, transferencias, NBIPP, ANALFPP, CERCANIA, interaccion) %>% 
   print()
+
 
 # POOLED OLS ####
 pooled <- lm(ids ~ transferencias + NBIPP + ANALFPP + CERCANIA + interaccion, data = panel)
@@ -33,46 +34,53 @@ summary(re)
 
 
 
-random_1 <- plm(ids ~ transferencias + NBIPP,
+
+fe_1 <- plm(ids ~ transferencias + NBIPP,
                 data = panel,
-                index = c("MUNICIPIO", "IDYEAR"),
-                model = "random")
+                index = c("MUNICIPIO", "IDYEAR"))
 
-random_2 <- plm(ids ~ transferencias + CERCANIA,
+fe_2 <- plm(ids ~ transferencias + CERCANIA,
             data = panel,
-            index = c("MUNICIPIO", "IDYEAR"),
-            model = "random")
+            index = c("MUNICIPIO", "IDYEAR"))
 
-random_3 <- plm(ids ~ transferencias + NBIPP + CERCANIA,
+fe_3 <- plm(ids ~ transferencias + NBIPP + CERCANIA,
             data = panel,
-            index = c("MUNICIPIO", "IDYEAR"),
-            model = "random")
+            index = c("MUNICIPIO", "IDYEAR"))
 
-random_4 <-  plm(ids ~ transferencias + NBIPP + interaccion,
+fe_4 <-  plm(ids ~ transferencias + NBIPP + interaccion,
              data = panel,
-             index = c("MUNICIPIO", "IDYEAR"),
-             model = "random")
+             index = c("MUNICIPIO", "IDYEAR"))
 
+#Mejor modelo de FE
+fe_5 <- plm(ids ~ transferencias + NBIPP + CERCANIA + interaccion,
+            data = panel,
+            index = c("MUNICIPIO", "IDYEAR"))
+
+#Mejor modelo de RE
 random_5 <- plm(ids ~ transferencias + NBIPP + CERCANIA + interaccion,
             data = panel,
             index = c("MUNICIPIO", "IDYEAR"),
             model = "random")
 
 
-re_models <- list(random_1, random_2, random_3, random_4, random_5)
+
+#Test de Hausman
+phtest(fe_5,random_5)
+
+fe_models <- list(fe_1, fe_2, fe_3, fe_4, fe_5)
 
 
 ## RESULTS ####
-screenreg(re_models,
+screenreg(fe_models,
           custom.model.names = c("Modelo 1", "Modelo 2", "Modelo 3","Modelo 4", "Modelo 5"),
-          custom.coef.names = c("Intercepto", "Transferencias PC","NBI PC", "Cercanía Gob","Transferencias * NBI"),
+          custom.coef.names = c("Transferencias PC","NBI PC", "Cercanía Gob","Transferencias * NBI"),
           single.row = TRUE)
 
 # EXPORT RESULTS
-htmlreg( list(random_1, random_2, random_3, random_4, random_5),
-         file = "modelos_efectos_aleatorios.doc", 
+htmlreg( list(fe_1, fe_2, fe_3, fe_4, fe_5),
+         file = "modelos_efectos_fijos.doc", 
          custom.model.names = c("Modelo 1", "Modelo 2", "Modelo 3","Modelo 4", "Modelo 5"),
-         custom.coef.names = c("Intercepto", "Transferencias PC","NBI PC", "Cercanía Gob","Transferencias * NBI"),
+         custom.coef.names = c("Transferencias PC","NBI PC", "Cercanía Gob","Transferencias * NBI"),
          single.row = TRUE,
          inline.css = FALSE,
          doctype = T,
