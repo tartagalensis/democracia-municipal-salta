@@ -25,6 +25,13 @@ municipal en Salta (1987-2019), Revista SAAP
 
 *base_analisis_resultados.xlsx*
 
-## Archivos:
+## Scripts:
 
+*DataWrangling.R*
+Ordenado y transformación de datos
 
+*IndiceDemoMunicipal.R*
+Se construye el índice de democracia municipal utilizado luego en el archivo de las regresiones
+
+*Regresiones.R*
+Modelado 
