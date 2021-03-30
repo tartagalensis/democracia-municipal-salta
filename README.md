@@ -5,7 +5,9 @@ Galeano, Franco (2021): Transferencias, desarrollo y alineamiento. Determinantes
 municipal en Salta (1987-2019), Revista SAAP
 
 
-Archivos:
+## Archivos:
+*variables_IDS.csv* 
+
 
 base_analisis_resultados.xlsx
 Datos:
