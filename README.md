@@ -25,6 +25,8 @@ municipal en Salta (1987-2019), Revista SAAP
 
 *base_analisis_resultados.xlsx*
 
+* En la hoja panel se encuentran las variables necesarias para realizar la regresión
+
 ## Scripts:
 
 *DataWrangling.R*
