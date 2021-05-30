@@ -2,8 +2,9 @@
 
 Este repo incluye scripts y datos para replicar el analisis realizado en:
 Galeano, Franco (2021): Transferencias, desarrollo y alineamiento. Determinantes de la democracia
-municipal en Salta (1987-2019), Revista SAAP
+municipal en Salta (1987-2019), Revista SAAP Vol. 15, Nº 1, mayo 2021, 73-102
 
+https://doi.org/10.46468/rsaap.15.1.A3
 
 ## Datos:
 *variables_IDS.csv* 
